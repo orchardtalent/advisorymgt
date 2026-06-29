@@ -50,6 +50,18 @@ export const LEGACY_STATUS_MAP: Record<string, string> = {
 // Valid OTG badge colour tokens for the status colour picker.
 export const STATUS_COLORS = ["green", "teal", "mint", "apricot", "terracotta", "outline"] as const;
 
+// Full, literal badge class per colour token. Spelling out the complete class
+// strings here (rather than building `otg-badge--${color}` dynamically) is what
+// keeps Tailwind from tree-shaking these @layer-component classes out of the build.
+export const STATUS_BADGE_CLASS: Record<string, string> = {
+  green:      "otg-badge otg-badge--green",
+  teal:       "otg-badge otg-badge--teal",
+  mint:       "otg-badge otg-badge--mint",
+  apricot:    "otg-badge otg-badge--apricot",
+  terracotta: "otg-badge otg-badge--terracotta",
+  outline:    "otg-badge otg-badge--outline",
+};
+
 // Categories for files uploaded against an engagement.
 export const FILE_CATEGORIES = [
   "Proposal",

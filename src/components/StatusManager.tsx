@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { STATUS_COLORS } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_BADGE_CLASS } from "@/lib/constants";
 
 type Status = {
   id: string;
@@ -85,7 +85,7 @@ export default function StatusManager({ initial }: { initial: Status[] }) {
                   {STATUS_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </td>
-              <td className="px-3 py-2"><span className={`otg-badge otg-badge--${s.color}`}>{s.name || "—"}</span></td>
+              <td className="px-3 py-2"><span className={STATUS_BADGE_CLASS[s.color] ?? STATUS_BADGE_CLASS.outline}>{s.name || "—"}</span></td>
               <td className="px-3 py-2"><input type="number" min="0" className={`${cell} text-right`} value={s.sortOrder} onChange={e => edit(s.id, "sortOrder", e.target.value)} /></td>
               <td className="px-3 py-2 text-center"><input type="checkbox" checked={s.active} onChange={e => edit(s.id, "active", e.target.checked)} /></td>
               <td className="px-3 py-2 text-center"><input type="checkbox" checked={s.isDefault} onChange={e => edit(s.id, "isDefault", e.target.checked)} /></td>
@@ -102,7 +102,7 @@ export default function StatusManager({ initial }: { initial: Status[] }) {
                 {STATUS_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </td>
-            <td className="px-3 py-3"><span className={`otg-badge otg-badge--${draft.color}`}>{draft.name || "Preview"}</span></td>
+            <td className="px-3 py-3"><span className={STATUS_BADGE_CLASS[draft.color] ?? STATUS_BADGE_CLASS.outline}>{draft.name || "Preview"}</span></td>
             <td></td><td></td><td></td>
             <td className="px-5 py-3 text-right"><button onClick={add} disabled={busy === "new"} className="otg-btn otg-btn--outline otg-btn--sm">+ Add status</button></td>
           </tr>

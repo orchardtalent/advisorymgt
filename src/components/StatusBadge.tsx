@@ -1,8 +1,9 @@
 import { getStatuses } from "@/lib/statuses";
+import { STATUS_BADGE_CLASS } from "@/lib/constants";
 
 // Server component — colour comes from the editable Status table (cached per request).
 export default async function StatusBadge({ status }: { status: string }) {
   const statuses = await getStatuses();
   const color = statuses.find((s) => s.name === status)?.color ?? "outline";
-  return <span className={`otg-badge otg-badge--${color}`}>{status}</span>;
+  return <span className={STATUS_BADGE_CLASS[color] ?? STATUS_BADGE_CLASS.outline}>{status}</span>;
 }
