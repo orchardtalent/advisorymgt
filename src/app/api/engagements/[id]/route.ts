@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, userIdFromSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calcFinancials } from "@/lib/constants";
 import { buildTimeEntryData } from "@/lib/timesheet";
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   // Log a status change to the activity feed (read-only system note).
   const newStatus = (rest as { status?: string }).status;
-  const authorId = (session.user as any)?.id as string | undefined;
+  const authorId = await userIdFromSession(session);
   if (newStatus && newStatus !== existing.status && authorId) {
     await prisma.note.create({
       data: {

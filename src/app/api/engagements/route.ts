@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, userIdFromSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calcFinancials } from "@/lib/constants";
 import { buildTimeEntryData } from "@/lib/timesheet";
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "client and consultantId are required" }, { status: 400 });
   }
 
-  const authorId = (session.user as any)?.id as string | undefined;
+  const authorId = await userIdFromSession(session);
   const entries = await buildTimeEntryData(timeEntries);
   const { directCost, chargeoutValue, referralFee, grossMargin, netMargin } =
     calcFinancials(agreedFee, entries, jotformCost, referralPct);

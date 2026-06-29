@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, userIdFromSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveFile } from "@/lib/storage";
 import { FILE_CATEGORIES, MAX_UPLOAD_BYTES } from "@/lib/constants";
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
-  const uploadedById = (session.user as any)?.id as string | undefined;
+  const uploadedById = await userIdFromSession(session);
 
   const form = await req.formData();
   const file = form.get("file");

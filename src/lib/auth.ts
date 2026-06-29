@@ -55,3 +55,15 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+// Resolve the current user's id from their session by EMAIL (stable), rather than
+// trusting the id baked into the JWT — which can go stale if user rows are
+// re-created. Returns null if not found.
+export async function userIdFromSession(
+  session: { user?: { email?: string | null } | null } | null
+): Promise<string | null> {
+  const email = session?.user?.email;
+  if (!email) return null;
+  const u = await prisma.user.findUnique({ where: { email: email.toLowerCase() }, select: { id: true } });
+  return u?.id ?? null;
+}
