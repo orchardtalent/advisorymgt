@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Editable rate card — one row per consultant level, with cost and charge-out rates.
+model RateCard {
+  id          String      @id @default(cuid())
+  role        String      @unique
+  hourlyCost  Float
+  chargeRate  Float
+  active      Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  consultants User[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  password      String
+  // Billing role — links to the rate card that sets this consultant's cost/charge rates.
+  roleId        String?
+  roleCard      RateCard?     @relation(fields: [roleId], references: [id])
+  canManage     Boolean       @default(false)  // may edit rate cards + consultants
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  engagements   Engagement[]  @relation("ConsultantEngagements")
+  timeEntries   TimeEntry[]
+}
+
+model Engagement {
+  id              String        @id @default(cuid())
+  client          String
+  clientNo        String?
+  service         String
+  status          Status        @default(ENQUIRY)
+  details         String?
+  startDate       DateTime?
+  dueDate         DateTime?
+  referralSource  String?
+  referralPct     Float         @default(0)  // referral fee as a % of agreed fee (e.g. 25 = 25%)
+
+  // Financials
+  agreedFee       Float?
+  jotformCost     Float         @default(0)
+
+  // Computed and stored for reporting (derived from the timesheet)
+  directCost      Float?        // sum(hours * costRate) + jotformCost
+  chargeoutValue  Float?        // sum(hours * chargeRate)
+  referralFee     Float?        // agreedFee * referralPct / 100
+  grossMargin     Float?        // (agreedFee - directCost) / agreedFee  — the practice view
+  netMargin       Float?        // (agreedFee - directCost - referralFee) / agreedFee  — the firm view
+
+  // Relations
+  consultantId    String        // lead / owning consultant
+  consultant      User          @relation("ConsultantEngagements", fields: [consultantId], references: [id])
+  timeEntries     TimeEntry[]
+  deliverables    Deliverable[]
+  notes           Note[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// A single line on an engagement's timesheet: who, when, how many hours.
+// costRate / chargeRate are snapshotted from the consultant's rate card when the
+// entry is logged, so editing a rate card later does not rewrite past billing.
+model TimeEntry {
+  id            String      @id @default(cuid())
+  engagementId  String
+  engagement    Engagement  @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  date          DateTime
+  hours         Float
+  costRate      Float
+  chargeRate    Float
+  note          String?
+  createdAt     DateTime    @default(now())
+}
+
+// Editable list of engagement types (the "service" field on an engagement is a
+// plain string, so removing a Service here never affects existing engagements).
+model Service {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Status {
+  ENQUIRY
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+  DECLINED
+}
+
+model Deliverable {
+  id            String      @id @default(cuid())
+  engagementId  String
+  engagement    Engagement  @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  title         String
+  type          String      // e.g. "Success Profile", "Report", "Briefing"
+  fileUrl       String?
+  notes         String?
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Note {
+  id            String      @id @default(cuid())
+  engagementId  String
+  engagement    Engagement  @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  content       String
+  authorId      String
+  createdAt     DateTime    @default(now())
+}

@@ -1,0 +1,51 @@
+/* OTG component layer. postcss-import inlines this here (before the @tailwind
+   directives are expanded), so its @layer components / @apply resolve correctly.
+   Must lead the file: @import has to precede all other rules. */
+@import "./otg-components.css";
+
+/* Self-hosted Source Sans 3 — OTG design system fonts */
+@font-face {
+  font-family: "Source Sans 3";
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/SourceSans3-light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans 3";
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/SourceSans3-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans 3";
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/SourceSans3-semibold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans 3";
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/SourceSans3-black.woff2") format("woff2");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Source Sans 3', 'Source Sans Pro', system-ui, sans-serif;
+    background-color: #FFFAF1;
+    color: #143333;
+  }
+  * { box-sizing: border-box; }
+}
+
+/* Print / PDF output — used by the report pages. A4 portrait, 1cm margins. */
+@media print {
+  @page { size: A4 portrait; margin: 1cm; }
+  body { background: #FFFFFF !important; }
+  /* keep brand colours and shaded table headers in the printed PDF */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}

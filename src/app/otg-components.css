@@ -1,0 +1,120 @@
+/**
+ * Orchard Talent Group — Tailwind components layer
+ * Class recipes for Button, Badge, Card and Input, reproducing the
+ * design-system components (components/core/*.jsx) exactly.
+ *
+ * Requires the OTG tailwind.config.js (token names below resolve to it).
+ * Import this AFTER Tailwind's base/components/utilities, e.g. in your
+ * global CSS:
+ *
+ *   @tailwind base;
+ *   @tailwind components;
+ *   @tailwind utilities;
+ *   @import "./otg-components.css";
+ *
+ * Then use semantic classes in markup: <button class="otg-btn otg-btn--primary otg-btn--md">.
+ * A copy-paste className cheatsheet (if you prefer utilities inline,
+ * e.g. with cva) is at the bottom of this file.
+ */
+
+@layer components {
+  /* ============ BUTTON ============ */
+  .otg-btn {
+    @apply inline-flex items-center justify-center gap-2 font-sans font-semibold leading-none
+           border border-transparent rounded-pill cursor-pointer no-underline whitespace-nowrap
+           transition-colors duration-fast ease-standard
+           active:translate-y-px focus-visible:outline-none focus-visible:shadow-focus
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0;
+  }
+  /* sizes */
+  .otg-btn--sm { @apply text-sm px-4 py-2; }
+  .otg-btn--md { @apply text-base px-[22px] py-[11px]; }
+  .otg-btn--lg { @apply text-md px-[30px] py-[15px]; }
+  /* variants */
+  .otg-btn--primary   { @apply bg-rich-green text-soft-ivory hover:bg-rich-green-700; }
+  .otg-btn--secondary { @apply bg-dark-teal text-soft-ivory hover:bg-dark-teal-800; }
+  .otg-btn--accent    { @apply bg-warm-terracotta text-dark-teal hover:bg-warm-terracotta-700; }
+  .otg-btn--outline   { @apply bg-transparent text-dark-teal border-dark-teal hover:bg-dark-teal hover:text-soft-ivory; }
+  .otg-btn--ghost     { @apply bg-transparent text-rich-green hover:bg-rich-green-100; }
+
+  /* ============ BADGE ============ */
+  .otg-badge {
+    @apply inline-flex items-center gap-1 font-sans font-semibold text-xs leading-none
+           px-[11px] py-[5px] rounded-pill tracking-[0.01em];
+  }
+  .otg-badge--green      { @apply bg-rich-green-100 text-rich-green-700; }
+  .otg-badge--mint       { @apply bg-fresh-mint-200 text-dark-teal; }
+  .otg-badge--teal       { @apply bg-dark-teal text-soft-ivory; }
+  .otg-badge--apricot    { @apply bg-apricot-blush-200 text-dark-teal; }
+  .otg-badge--terracotta { @apply bg-warm-terracotta text-dark-teal; }
+  .otg-badge--outline    { @apply bg-transparent text-muted ring-1 ring-inset ring-border-strong; }
+
+  /* ============ CARD ============ */
+  .otg-card {
+    @apply bg-surface rounded-lg border border-border-subtle shadow-sm p-6
+           transition duration-base ease-standard;
+  }
+  .otg-card--interactive { @apply cursor-pointer hover:shadow-md hover:-translate-y-0.5; }
+  .otg-card--tint        { @apply bg-rich-green-100 border-transparent; }
+  .otg-card--mint        { @apply bg-fresh-mint-200 border-transparent; }
+  .otg-card--ivory       { @apply bg-soft-ivory border-border-subtle; }
+  .otg-card--inverse     { @apply bg-dark-teal border-transparent text-soft-ivory; }
+  .otg-card--flat        { @apply shadow-none; }
+
+  /* ============ INPUT / FIELD ============ */
+  .otg-field        { @apply flex flex-col gap-2 font-sans; }
+  .otg-field__label { @apply text-sm font-semibold text-heading; }
+  .otg-field__hint  { @apply text-xs text-muted; }
+  .otg-input {
+    @apply font-sans font-normal text-base text-body bg-bg-raised w-full
+           border border-border-strong rounded-md px-[14px] py-[11px]
+           transition-colors duration-fast ease-standard
+           placeholder:text-muted placeholder:opacity-80
+           hover:border-rich-green-300
+           focus:outline-none focus:border-rich-green focus:shadow-focus
+           disabled:bg-soft-ivory-shade disabled:opacity-70 disabled:cursor-not-allowed;
+  }
+  .otg-input--invalid { @apply border-warm-terracotta focus:[box-shadow:0_0_0_3px_rgba(229,137,91,0.3)]; }
+  textarea.otg-input  { @apply resize-y min-h-[96px] leading-normal; }
+}
+
+/* ============================================================
+   className cheatsheet — same recipes as flat utility strings,
+   for inline use (e.g. with clsx / class-variance-authority).
+
+   BUTTON base:
+     inline-flex items-center justify-center gap-2 font-sans font-semibold leading-none
+     border border-transparent rounded-pill whitespace-nowrap transition-colors duration-fast
+     ease-standard active:translate-y-px focus-visible:shadow-focus focus-visible:outline-none
+     disabled:opacity-50 disabled:cursor-not-allowed
+   sizes:  sm → text-sm px-4 py-2 · md → text-base px-[22px] py-[11px] · lg → text-md px-[30px] py-[15px]
+   primary    → bg-rich-green text-soft-ivory hover:bg-rich-green-700
+   secondary  → bg-dark-teal text-soft-ivory hover:bg-dark-teal-800
+   accent     → bg-warm-terracotta text-dark-teal hover:bg-warm-terracotta-700
+   outline    → bg-transparent text-dark-teal border-dark-teal hover:bg-dark-teal hover:text-soft-ivory
+   ghost      → bg-transparent text-rich-green hover:bg-rich-green-100
+
+   BADGE base:
+     inline-flex items-center gap-1 font-sans font-semibold text-xs leading-none
+     px-[11px] py-[5px] rounded-pill tracking-[0.01em]
+   green → bg-rich-green-100 text-rich-green-700 · mint → bg-fresh-mint-200 text-dark-teal
+   teal → bg-dark-teal text-soft-ivory · apricot → bg-apricot-blush-200 text-dark-teal
+   terracotta → bg-warm-terracotta text-dark-teal · outline → bg-transparent text-muted ring-1 ring-inset ring-border-strong
+
+   CARD base:
+     bg-bg-raised rounded-lg border border-border-subtle shadow-sm p-6 transition duration-base ease-standard
+   interactive → cursor-pointer hover:shadow-md hover:-translate-y-0.5
+   tint → bg-rich-green-100 border-transparent · mint → bg-fresh-mint-200 border-transparent
+   ivory → bg-soft-ivory border-border-subtle · inverse → bg-dark-teal border-transparent text-soft-ivory
+   flat → shadow-none
+
+   INPUT:
+     field  → flex flex-col gap-2 font-sans
+     label  → text-sm font-semibold text-heading
+     hint   → text-xs text-muted
+     input  → font-sans text-base text-body bg-bg-raised w-full border border-border-strong rounded-md
+              px-[14px] py-[11px] transition-colors duration-fast hover:border-rich-green-300
+              focus:outline-none focus:border-rich-green focus:shadow-focus
+              disabled:bg-soft-ivory-shade disabled:opacity-70
+     invalid→ border-warm-terracotta
+   ============================================================ */
