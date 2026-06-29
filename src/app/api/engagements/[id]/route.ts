@@ -7,7 +7,7 @@ import { buildTimeEntryData } from "@/lib/timesheet";
 
 const timeEntryInclude = {
   consultant:   { select: { id: true, name: true } },
-  deliverables: true,
+  attachments:  true,
   notes:        { orderBy: { createdAt: "desc" } },
   timeEntries: {
     orderBy: { date: "asc" },
@@ -71,6 +71,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     },
     include: timeEntryInclude,
   });
+
+  // Log a status change to the activity feed (read-only system note).
+  const newStatus = (rest as { status?: string }).status;
+  const authorId = (session.user as any)?.id as string | undefined;
+  if (newStatus && newStatus !== existing.status && authorId) {
+    await prisma.note.create({
+      data: {
+        engagementId: params.id,
+        content: `changed status from ${existing.status} to ${newStatus}`,
+        system: true,
+        authorId,
+      },
+    });
+  }
 
   return NextResponse.json(updated);
 }

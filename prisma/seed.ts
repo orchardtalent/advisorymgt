@@ -49,6 +49,22 @@ async function main() {
     });
   }
 
+  console.log("Seeding statuses…");
+  const STATUSES = [
+    { name: "Enquiry",   color: "outline",    sortOrder: 1, isDefault: true },
+    { name: "Active",    color: "green",      sortOrder: 2, isDefault: false },
+    { name: "Completed", color: "teal",       sortOrder: 3, isDefault: false },
+    { name: "On hold",   color: "apricot",    sortOrder: 4, isDefault: false },
+    { name: "Declined",  color: "terracotta", sortOrder: 5, isDefault: false },
+  ];
+  for (const st of STATUSES) {
+    await prisma.status.upsert({
+      where: { name: st.name },
+      update: { color: st.color, sortOrder: st.sortOrder, isDefault: st.isDefault, active: true },
+      create: st,
+    });
+  }
+
   const partner = await prisma.rateCard.findUnique({ where: { role: "Partner" } });
   const srConsultant = await prisma.rateCard.findUnique({ where: { role: "Senior Recruitment Consultant" } });
 

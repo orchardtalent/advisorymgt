@@ -36,8 +36,8 @@ export default async function DashboardPage({
   const totalFee      = engagements.reduce((s, e) => s + (e.agreedFee   ?? 0), 0);
   const totalCost     = engagements.reduce((s, e) => s + (e.directCost  ?? 0), 0);
   const totalReferral = engagements.reduce((s, e) => s + (e.referralFee ?? 0), 0);
-  const active    = engagements.filter(e => e.status === "ACTIVE").length;
-  const completed = engagements.filter(e => e.status === "COMPLETED").length;
+  const active    = engagements.filter(e => e.status?.toLowerCase() === "active").length;
+  const completed = engagements.filter(e => e.status?.toLowerCase() === "completed").length;
   const blendedGross = totalFee > 0 ? ((totalFee - totalCost) / totalFee) * 100 : null;
   const blendedNet   = totalFee > 0 ? ((totalFee - totalCost - totalReferral) / totalFee) * 100 : null;
 

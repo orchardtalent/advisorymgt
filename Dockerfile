@@ -32,6 +32,10 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
+# Pre-create the uploads mount point owned by the app user. A named volume mounted
+# here inherits this ownership on first init, so uploads work as the non-root user.
+RUN mkdir -p /data/uploads && chown -R nextjs:nodejs /data
+
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000

@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Shell from "@/components/Shell";
 import StatusBadge from "@/components/StatusBadge";
-import { fmtCurrency, fmtPct, STATUS_LABELS } from "@/lib/constants";
+import { fmtCurrency, fmtPct } from "@/lib/constants";
+import { getActiveStatusNames } from "@/lib/statuses";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -34,12 +35,12 @@ export default async function EngagementsPage({
     },
     include: {
       consultant: { select: { id: true, name: true } },
-      _count:     { select: { deliverables: true, notes: true } },
+      _count:     { select: { attachments: true, notes: true } },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  const statuses = ["ALL", ...Object.keys(STATUS_LABELS)];
+  const statuses = ["ALL", ...(await getActiveStatusNames())];
   const current  = searchParams.status ?? "ALL";
 
   return (
@@ -64,12 +65,12 @@ export default async function EngagementsPage({
             {statuses.map(s => (
               <Link
                 key={s}
-                href={`/engagements?status=${s}${q ? `&q=${q}` : ""}`}
+                href={`/engagements?status=${encodeURIComponent(s)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
                 className={`otg-btn otg-btn--sm ${
                   current === s ? "otg-btn--primary" : "otg-btn--ghost"
                 }`}
               >
-                {s === "ALL" ? "All" : STATUS_LABELS[s]}
+                {s === "ALL" ? "All" : s}
               </Link>
             ))}
           </div>
@@ -105,9 +106,9 @@ export default async function EngagementsPage({
                       <Link href={`/engagements/${e.id}`} className="font-semibold text-heading hover:text-link transition-colors duration-fast">
                         {e.client}
                       </Link>
-                      {(e._count.deliverables > 0 || e._count.notes > 0) && (
+                      {(e._count.attachments > 0 || e._count.notes > 0) && (
                         <div className="flex gap-2 mt-0.5">
-                          {e._count.deliverables > 0 && <span className="text-xs text-muted">{e._count.deliverables} deliverable{e._count.deliverables !== 1 ? "s" : ""}</span>}
+                          {e._count.attachments > 0 && <span className="text-xs text-muted">{e._count.attachments} file{e._count.attachments !== 1 ? "s" : ""}</span>}
                           {e._count.notes > 0         && <span className="text-xs text-muted">{e._count.notes} note{e._count.notes !== 1 ? "s" : ""}</span>}
                         </div>
                       )}

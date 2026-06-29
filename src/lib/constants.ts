@@ -28,7 +28,18 @@ export const SERVICES = [
   "Other",
 ] as const;
 
-export const STATUS_LABELS: Record<string, string> = {
+// Seed values for the editable Status table. Once seeded, the live list lives in
+// the Status table and is managed in the app. `color` is an OTG badge token.
+export const DEFAULT_STATUSES = [
+  { name: "Enquiry",   color: "outline",    sortOrder: 1, isDefault: true },
+  { name: "Active",    color: "green",      sortOrder: 2, isDefault: false },
+  { name: "Completed", color: "teal",       sortOrder: 3, isDefault: false },
+  { name: "On hold",   color: "apricot",    sortOrder: 4, isDefault: false },
+  { name: "Declined",  color: "terracotta", sortOrder: 5, isDefault: false },
+] as const;
+
+// Old enum value -> new status name, for migrating existing engagements.
+export const LEGACY_STATUS_MAP: Record<string, string> = {
   ENQUIRY:   "Enquiry",
   ACTIVE:    "Active",
   COMPLETED: "Completed",
@@ -36,13 +47,19 @@ export const STATUS_LABELS: Record<string, string> = {
   DECLINED:  "Declined",
 };
 
-export const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-  ENQUIRY:   { bg: "#EFF6FF", text: "#1D4ED8", dot: "#3B82F6" },
-  ACTIVE:    { bg: "#F0FDF4", text: "#15803D", dot: "#22C55E" },
-  COMPLETED: { bg: "#F5F3FF", text: "#6D28D9", dot: "#8B5CF6" },
-  ON_HOLD:   { bg: "#FFFBEB", text: "#B45309", dot: "#F59E0B" },
-  DECLINED:  { bg: "#FEF2F2", text: "#B91C1C", dot: "#EF4444" },
-};
+// Valid OTG badge colour tokens for the status colour picker.
+export const STATUS_COLORS = ["green", "teal", "mint", "apricot", "terracotta", "outline"] as const;
+
+// Categories for files uploaded against an engagement.
+export const FILE_CATEGORIES = [
+  "Proposal",
+  "Proposal signed",
+  "Background information",
+  "Deliverable",
+] as const;
+
+// Upload guardrails.
+export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB
 
 // A timesheet line as far as the maths is concerned. costRate / chargeRate are
 // the rates snapshotted onto the entry when it was logged.

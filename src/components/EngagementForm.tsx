@@ -3,14 +3,6 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { calcFinancials, fmtCurrency, fmtPct, JOTFORM_PER_ENGAGEMENT } from "@/lib/constants";
 
-const STATUSES = [
-  { value: "ENQUIRY",   label: "Enquiry" },
-  { value: "ACTIVE",    label: "Active" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "ON_HOLD",   label: "On hold" },
-  { value: "DECLINED",  label: "Declined" },
-];
-
 type Consultant = {
   id: string;
   name: string;
@@ -22,6 +14,8 @@ type Row = { key: string; userId: string; date: string; hours: string };
 interface Props {
   consultants: Consultant[];
   services: string[];
+  statuses: string[];
+  defaultStatus?: string;
   engagement?: any;
   defaultConsultantId?: string;
   mode: "create" | "edit";
@@ -36,23 +30,26 @@ function today() {
   return new Date().toISOString().split("T")[0];
 }
 
-export default function EngagementForm({ consultants, services, engagement, defaultConsultantId, mode }: Props) {
+export default function EngagementForm({ consultants, services, statuses, defaultStatus, engagement, defaultConsultantId, mode }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState("");
   const keyRef = useRef(0);
   const nextKey = () => `r${keyRef.current++}`;
 
-  // Keep the engagement's current type selectable even if it has since been deactivated/removed.
+  // Keep the engagement's current type/status selectable even if it was since deactivated/removed.
   const serviceOptions = engagement?.service && !services.includes(engagement.service)
     ? [engagement.service, ...services]
     : services;
+  const statusOptions = engagement?.status && !statuses.includes(engagement.status)
+    ? [engagement.status, ...statuses]
+    : statuses;
 
   const [form, setForm] = useState({
     client:          engagement?.client         ?? "",
     clientNo:        engagement?.clientNo        ?? "",
     service:         engagement?.service        ?? services[0] ?? "",
-    status:          engagement?.status         ?? "ENQUIRY",
+    status:          engagement?.status         ?? defaultStatus ?? statuses[0] ?? "",
     consultantId:    engagement?.consultantId   ?? defaultConsultantId ?? "",
     referralSource:  engagement?.referralSource ?? "",
     referralPct:     engagement?.referralPct    != null ? String(engagement.referralPct) : "",
@@ -160,7 +157,7 @@ export default function EngagementForm({ consultants, services, engagement, defa
               <div className={fieldCls}>
                 <label className={labelCls}>Status</label>
                 <select className={inputCls} value={form.status} onChange={set("status")}>
-                  {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  {statusOptions.map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
               <div className={fieldCls}>

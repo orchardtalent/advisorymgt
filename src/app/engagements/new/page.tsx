@@ -4,12 +4,13 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Shell from "@/components/Shell";
 import EngagementForm from "@/components/EngagementForm";
+import { getActiveStatusNames, getDefaultStatusName } from "@/lib/statuses";
 
 export default async function NewEngagementPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const [consultants, services] = await Promise.all([
+  const [consultants, services, statusNames, defaultStatus] = await Promise.all([
     prisma.user.findMany({
       where: { active: true },
       select: {
@@ -24,6 +25,8 @@ export default async function NewEngagementPage() {
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       select: { name: true },
     }),
+    getActiveStatusNames(),
+    getDefaultStatusName(),
   ]);
 
   const sessionUserId = (session.user as any)?.id as string | undefined;
@@ -35,6 +38,8 @@ export default async function NewEngagementPage() {
         <EngagementForm
           consultants={consultants}
           services={services.map(s => s.name)}
+          statuses={statusNames}
+          defaultStatus={defaultStatus}
           defaultConsultantId={sessionUserId}
           mode="create"
         />

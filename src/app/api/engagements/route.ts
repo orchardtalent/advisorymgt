@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     },
     include: {
       consultant:   { select: { id: true, name: true } },
-      deliverables: { select: { id: true, title: true, completedAt: true } },
+      attachments:  { select: { id: true, title: true, category: true } },
       _count:       { select: { notes: true, timeEntries: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "client and consultantId are required" }, { status: 400 });
   }
 
+  const authorId = (session.user as any)?.id as string | undefined;
   const entries = await buildTimeEntryData(timeEntries);
   const { directCost, chargeoutValue, referralFee, grossMargin, netMargin } =
     calcFinancials(agreedFee, entries, jotformCost, referralPct);
@@ -66,6 +67,8 @@ export async function POST(req: NextRequest) {
       agreedFee, jotformCost,
       directCost, chargeoutValue, referralFee, grossMargin, netMargin,
       timeEntries: { create: entries },
+      // Seed the activity log with a creation event (authored by the lead if no session id).
+      notes: { create: { content: `created this engagement${status ? ` as ${status}` : ""}`, system: true, authorId: authorId ?? consultantId } },
     },
     include: {
       consultant: { select: { id: true, name: true } },

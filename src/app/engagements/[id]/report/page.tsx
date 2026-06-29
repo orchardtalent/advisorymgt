@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { fmtCurrency, fmtPct, STATUS_LABELS } from "@/lib/constants";
+import { fmtCurrency, fmtPct } from "@/lib/constants";
 import PrintButton from "@/components/PrintButton";
 import Link from "next/link";
 
@@ -72,7 +72,7 @@ export default async function EngagementReportPage({ params }: { params: { id: s
           <h1 className="text-2xl font-black text-heading tracking-tight">{engagement.client}</h1>
           <div className="grid grid-cols-2 gap-x-8 gap-y-1.5 mt-4 text-sm">
             <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Service</span><span className="font-semibold text-heading">{engagement.service}</span></div>
-            <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Status</span><span className="font-semibold text-heading">{STATUS_LABELS[engagement.status] ?? engagement.status}</span></div>
+            <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Status</span><span className="font-semibold text-heading">{engagement.status}</span></div>
             <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Client number</span><span className="font-semibold text-heading">{engagement.clientNo || "—"}</span></div>
             <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Lead consultant</span><span className="font-semibold text-heading">{engagement.consultant.name}</span></div>
             <div className="flex justify-between border-b border-border-subtle py-1.5"><span className="text-muted">Start date</span><span className="font-semibold text-heading">{engagement.startDate ? auDate(engagement.startDate) : "—"}</span></div>

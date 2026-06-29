@@ -6,6 +6,7 @@ const TABS = [
   { href: "/settings/rate-cards",  label: "Rate cards" },
   { href: "/settings/consultants", label: "Consultants" },
   { href: "/settings/services",    label: "Engagement types" },
+  { href: "/settings/statuses",    label: "Statuses" },
 ];
 
 export default function SettingsNav() {
