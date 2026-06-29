@@ -11,6 +11,7 @@ type Consultant = {
   canManage: boolean;
   roleId: string | null;
   roleCard: { role: string } | null;
+  password?: string; // transient — typed in to set a new login password
   _count?: { engagements: number; timeEntries: number };
 };
 
@@ -19,26 +20,34 @@ export default function ConsultantManager({ initial, rateCards }: { initial: Con
   const [people, setPeople] = useState<Consultant[]>(initial);
   const [busy, setBusy]     = useState<string | null>(null);
   const [error, setError]   = useState("");
+  const [note, setNote]     = useState("");
   const [draft, setDraft]   = useState({ name: "", email: "", roleId: "", password: "", canManage: false });
 
   const edit = (id: string, field: keyof Consultant, value: any) =>
     setPeople(ps => ps.map(p => (p.id === id ? { ...p, [field]: value } : p)));
 
   async function save(p: Consultant) {
-    setBusy(p.id); setError("");
+    setBusy(p.id); setError(""); setNote("");
     const res = await fetch(`/api/users/${p.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: p.name, email: p.email, roleId: p.roleId, canManage: p.canManage, active: p.active }),
+      body: JSON.stringify({
+        name: p.name, email: p.email, roleId: p.roleId,
+        canManage: p.canManage, active: p.active,
+        password: p.password ?? "", // blank = leave unchanged (API ignores empty)
+      }),
     });
     setBusy(null);
     if (!res.ok) { setError((await res.json().catch(() => ({}))).error ?? "Save failed"); return; }
+    if (p.password?.trim()) setNote(`Saved — password updated for ${p.name}.`);
+    else setNote(`Saved ${p.name}.`);
+    edit(p.id, "password", "");
     router.refresh();
   }
 
   async function deactivate(p: Consultant) {
     if (!confirm(`Deactivate ${p.name}? They will be hidden from selection but their history is kept.`)) return;
-    setBusy(p.id); setError("");
+    setBusy(p.id); setError(""); setNote("");
     const res = await fetch(`/api/users/${p.id}`, { method: "DELETE" });
     setBusy(null);
     if (!res.ok) { setError((await res.json().catch(() => ({}))).error ?? "Failed"); return; }
@@ -47,7 +56,7 @@ export default function ConsultantManager({ initial, rateCards }: { initial: Con
 
   async function add() {
     if (!draft.name.trim() || !draft.email.trim()) { setError("Name and email are required"); return; }
-    setBusy("new"); setError("");
+    setBusy("new"); setError(""); setNote("");
     const res = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -64,12 +73,14 @@ export default function ConsultantManager({ initial, rateCards }: { initial: Con
   return (
     <div className="otg-card otg-card--flat p-0 overflow-hidden">
       {error && <p className="text-sm text-warm-terracotta bg-apricot-blush-200 px-5 py-3">{error}</p>}
+      {note && <p className="text-sm text-rich-green-700 bg-rich-green-100 px-5 py-3">{note}</p>}
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-soft-ivory text-xs font-semibold text-muted uppercase tracking-eyebrow border-b border-border-subtle">
             <th className="text-left px-5 py-3">Name</th>
             <th className="text-left px-3 py-3">Email</th>
-            <th className="text-left px-3 py-3 w-56">Role</th>
+            <th className="text-left px-3 py-3 w-48">Role</th>
+            <th className="text-left px-3 py-3 w-48">Set password</th>
             <th className="text-center px-3 py-3 w-20">Active</th>
             <th className="text-right px-5 py-3 w-44"></th>
           </tr>
@@ -84,6 +95,9 @@ export default function ConsultantManager({ initial, rateCards }: { initial: Con
                   <option value="">— No role —</option>
                   {rateCards.map(rc => <option key={rc.id} value={rc.id}>{rc.role}</option>)}
                 </select>
+              </td>
+              <td className="px-3 py-2">
+                <input type="password" autoComplete="new-password" className={cell} placeholder="Leave blank to keep" value={p.password ?? ""} onChange={e => edit(p.id, "password", e.target.value)} />
               </td>
               <td className="px-3 py-2 text-center"><input type="checkbox" checked={p.active} onChange={e => edit(p.id, "active", e.target.checked)} /></td>
               <td className="px-5 py-2 text-right whitespace-nowrap">
@@ -101,11 +115,17 @@ export default function ConsultantManager({ initial, rateCards }: { initial: Con
                 {rateCards.map(rc => <option key={rc.id} value={rc.id}>{rc.role}</option>)}
               </select>
             </td>
+            <td className="px-3 py-3">
+              <input type="password" autoComplete="new-password" className={cell} placeholder="Optional login password" value={draft.password} onChange={e => setDraft(d => ({ ...d, password: e.target.value }))} />
+            </td>
             <td></td>
             <td className="px-5 py-3 text-right"><button onClick={add} disabled={busy === "new"} className="otg-btn otg-btn--outline otg-btn--sm">+ Add consultant</button></td>
           </tr>
         </tbody>
       </table>
+      <p className="text-xs text-muted px-5 py-3 border-t border-border-subtle">
+        To change your own password, edit your row, type a new password under “Set password”, and click Save. Leave it blank to keep the current one.
+      </p>
     </div>
   );
 }
